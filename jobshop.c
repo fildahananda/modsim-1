@@ -2,18 +2,20 @@
 
 #include "simlib.h"		/* Required for use of simlib.c. */
 
-#define EVENT_ARRIVAL_1					1	 /* Event type for arrival of a job to the system. */
-#define EVENT_ARRIVAL_2					2	 /* Event type for arrival of a job to the system. */
-#define EVENT_ARRIVAL_3					3	 /* Event type for arrival of a job to the system. */
-#define EVENT_DEPARTURE_BUS			4	 /* Event type for departure of a job from a particular station. */
-#define EVENT_ARRIVE_BUS				5	 /* Event type for departure of a job from a particular station. */
-#define EVENT_END_SIMULATION		6	 /* Event type for end of the simulation. */
-#define STREAM_INTERARRIVAL_1		1	 /* Random-number stream for interarrivals. */
-#define STREAM_INTERARRIVAL_2		2	 /* Random-number stream for interarrivals. */
-#define STREAM_INTERARRIVAL_3		3	 /* Random-number stream for interarrivals. */
-#define STREAM_UNLOADING				4	 /* Random-number stream for job types. */
-#define STREAM_LOADING					5	 /* Random-number stream for service times. */
-#define STREAM_DESTINATION_ARV	6	 /* Random-number stream for service times. */
+#define EVENT_ARRIVAL_1					1	 /* Event type for arrival of a job to terminal 1. */
+#define EVENT_ARRIVAL_2					2	 /* Event type for arrival of a job to terminal 2. */
+#define EVENT_ARRIVAL_3					3	 /* Event type for arrival of a job to car rental. */
+#define EVENT_DEPARTURE_BUS			4	 /* Event type for departure of a bus. */
+#define EVENT_ARRIVE_BUS				5	 /* Event type for arrival of a bus. */
+#define EVENT_LOAD				      6	 /* Event type for loading passengers from a particular station. */
+#define EVENT_UNLOAD				    7	 /* Event type for unloading passengers to a particular station. */
+#define EVENT_END_SIMULATION		8	 /* Event type for end of the simulation. */
+#define STREAM_INTERARRIVAL_1		1	 /* Random-number stream for interarrivals at terminal 1. */
+#define STREAM_INTERARRIVAL_2		2	 /* Random-number stream for interarrivals at terminal 2. */
+#define STREAM_INTERARRIVAL_3		3	 /* Random-number stream for interarrivals at car rental. */
+#define STREAM_UNLOADING				4	 /* Random-number stream for unloading time. */
+#define STREAM_LOADING					5	 /* Random-number stream for loading time. */
+#define STREAM_DESTINATION_ARV	6	 /* Random-number stream for selecting destination from car rental. */
 #define MAX_NUM_STATIONS				3	 /* Maximum number of stations. */
 #define MAX_NUM_BUS							1	 /* Maximum number of bus. */
 #define MAX_NUM_SEATS						20 /* Maximum number of seats. */
