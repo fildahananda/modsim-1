@@ -24,8 +24,8 @@
 
 int num_stations, num_seats, i, j, num_machines[MAX_NUM_STATIONS + 1],
   num_tasks[MAX_NUM_JOB_TYPES + 1],
-  route[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1], num_machines_busy[MAX_NUM_STATIONS + 1], job_type, task;
-double mean_interarrival, length_simulation, prob_distrib_job_type[26],
+  route[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1], num_machines_busy[MAX_NUM_STATIONS + 1], job_type, task, bus_position, bus_moving;
+double mean_interarrival, length_simulation, prob_distrib_job_type[26], dist[MAX_NUM_LOCATION+1][MAX_NUM_LOCATION+1],
   mean_service[MAX_NUM_JOB_TYPES + 1][MAX_NUM_STATIONS + 1];
 FILE *infile, *outfile;
 
@@ -154,6 +154,19 @@ depart (void)			/* Event function for departure of a job from a particular
     }
 }
 
+void move_b(void){
+  int init = bus_position;
+  bus_moving = 1;
+  int dest;
+  if(bus_position != 3){
+    dest = bus_position + 1;
+  }
+  else{
+    dest = 3;
+  }
+
+  event_schedule(sim_time+dist[init][dest], EVENT_ARRIVE_BUS);
+}
 
 void
 report (void)			/* Report generator function. */
