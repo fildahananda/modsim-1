@@ -17,6 +17,11 @@
 #define MAX_NUM_STATIONS				3	 /* Maximum number of stations. */
 #define MAX_NUM_BUS							1	 /* Maximum number of bus. */
 #define MAX_NUM_SEATS						20 /* Maximum number of seats. */
+#define VAR_QUEUE_STATION       0  /* Zero index of statistic variable for queue in station 1/2/3 */
+#define VAR_BUS_AT_STATION      3  /* Zero index of statistic variable for bus stop at station 1/2/3 */
+#define VAR_PERSON_FROM_STATION 6  /* Zero index of statistic variable for person arrive at station 1/2/3 */
+#define VAR_BUS                 10 /* Statistic variable for bus */
+
 
 int bus_position, bus_moving, capacity, waiting_time;
 double arrive_time_b;
@@ -33,7 +38,7 @@ void arrive_b(void){
     bus_position = 1;
   }
 
-  sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
+  //sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
   
   arrive_time_b = sim_time;
   unload();
@@ -50,17 +55,27 @@ void move_b(void){
   }
   else{
     dest = 3;
+    // report time bus spent on loop here
   }
 
+  // report time bus spent on each station below 
   event_schedule(sim_time+dist[init][dest], EVENT_ARRIVE_BUS);
 }
 
 void unload() {
   int destination = bus_position;
+  int origin, arrival_time;
 
   if (list_size[MAX_NUM_STATIONS + destination] > 0) {
     list_remove(FIRST, MAX_NUM_STATIONS + destination);
+    arrival_time = transfer[1];
+    origin = transfer[2];
+
     ++capacity;
+    timest(capacity, VAR_BUS); // report changing number on the bus
+
+    sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
+
     event_schedule(sim_time + uniform(16,24,STREAM_UNLOADING), EVENT_UNLOAD);
   }
   else {
@@ -69,14 +84,21 @@ void unload() {
 }
 
 void load() {
+  int arrival_time, destination;
   int terminal = bus_position;
   int time_at_position = sim_time - arrive_time_b;
 
   if (list_size[terminal] > 0 && capacity > 0) {
     list_remove(FIRST, terminal);
-    destination = transfer[1]; //destination yg ditentukan saat arrive
+    arrival_time = transfer[1];
+    destination = transfer[3]; // destination yg ditentukan saat arrive
     list_file(LAST, MAX_NUM_STATIONS + destination);
+
     --capacity;
+    timest(capacity, VAR_BUS); // report changing number on the bus
+
+    sampst(sim_time - arrival_time, VAR_QUEUE_STATION + terminal); // report delay time queue in this station
+
     event_scheduleo(sim_time + uniform(15,25,STREAM_LOADING), EVENT_LOAD);
   }
   else {
