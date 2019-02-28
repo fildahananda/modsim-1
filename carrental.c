@@ -194,21 +194,21 @@ void report(void){
 	
 	fprintf (outfile, "\n\nd.\n");
 	for (i = 1; i <= MAX_NUM_STATIONS; i++){
-
+    sampst(0.0, -i + VAR_BUS_AT_STATION);
 		fprintf (outfile, "Average time stop in location %d: %0.3f\n", i, transfer[1]);
 		fprintf (outfile, "Maximum time stop in location %d: %0.3f\n", i, transfer[3]);
 		fprintf (outfile, "Minimum time stop in location %d: %0.3f\n", i, transfer[4]);
 	}
 	
 	fprintf (outfile, "\n\ne.\n");
-
+  sampst(0.0, -10);
 	fprintf (outfile, "Average time to make a loop:	%0.3f\n", transfer[1]);
 	fprintf (outfile, "Maximum time to make a loop:	%0.3f\n", transfer[3]);
 	fprintf (outfile, "Minimum time to make a loop:	%0.3f\n", transfer[4]);
 	
 	fprintf (outfile, "\n\nf.\n");
 	for (i = 1; i <= MAX_NUM_STATIONS; i++){
-
+    sampst(0.0, -i + VAR_QUEUE_STATION);
 		fprintf (outfile, "Average time person in system from location %d: %0.3f\n", i, transfer[1]);
 		fprintf (outfile, "Maximum time person in system from location %d: %0.3f\n", i, transfer[3]);
 		fprintf (outfile, "Minimum time person in system from location %d: %0.3f\n", i, transfer[4]);
