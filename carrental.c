@@ -92,8 +92,6 @@ void unload() {
 
     sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
 
-    transfer[3] = origin;
-    transfer[4] = destination;
     event_schedule(sim_time + uniform(16,24,STREAM_UNLOADING), EVENT_UNLOAD);
     fprintf (outfile, "Ev unload%19d\n",capacity);
   }
