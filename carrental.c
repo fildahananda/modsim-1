@@ -23,14 +23,15 @@
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
 
-int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j;
-double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[MAX_NUM_STATIONS], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1];
+int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j, bus_idle;
+double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1];
 FILE *infile, *outfile;
 
 void move_b(){
   int init = bus_position;
   int dest;
   bus_moving = 1;
+  bus_idle = 0;
   
   if(bus_position != 3){
     dest = bus_position + 1;
@@ -42,17 +43,23 @@ void move_b(){
 
   // report time bus spent on each station below 
   event_schedule(sim_time+dist[init][dest], EVENT_ARRIVE_BUS);
+  fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
 
 void load() {
-  int arrival_time, destination;
+  int arrival_time, origin, destination;
   int terminal = bus_position;
   int time_at_position = sim_time - arrive_time_b;
 
   if (list_size[terminal] > 0 && capacity > 0) {
     list_remove(FIRST, terminal);
     arrival_time = transfer[1];
+    origin = transfer[2];
     destination = transfer[3]; // destination yg ditentukan saat arrive
+    
+    transfer[1] = sim_time;
+    transfer[2] = origin;
+    transfer[3] = destination;
     list_file(LAST, MAX_NUM_STATIONS + destination);
 
     --capacity;
@@ -61,6 +68,7 @@ void load() {
     sampst(sim_time - arrival_time, VAR_QUEUE_STATION + terminal); // report delay time queue in this station
 
     event_schedule(sim_time + uniform(15,25,STREAM_LOADING), EVENT_LOAD);
+    fprintf (outfile, "Ev load%21d\n",capacity);
   }
   else {
     if (time_at_position >= waiting_time) {
@@ -71,6 +79,7 @@ void load() {
 
       // belum menangani kasus penumpang datang setelah loading selesai saat time_at_position < waiting_time
     }
+    bus_idle = 1;
   }
 }
 
@@ -88,7 +97,10 @@ void unload() {
 
     sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
 
+    transfer[3] = origin;
+    transfer[4] = destination;
     event_schedule(sim_time + uniform(16,24,STREAM_UNLOADING), EVENT_UNLOAD);
+    fprintf (outfile, "Ev unload%21d\n",capacity);
   }
   else {
     load();
@@ -102,23 +114,32 @@ void arrive (int new_job, int station)
 	if (station == 1)
 	{
 		event_schedule(sim_time + expon (mean_interarrival[1], STREAM_INTERARRIVAL_1), EVENT_ARRIVAL_1);
-		destination = 3;
+		fprintf (outfile, "Ev arrival 1\n");
+    destination = 3;
 	}
 	else if (station == 2)
 	{
 		event_schedule(sim_time + expon (mean_interarrival[2], STREAM_INTERARRIVAL_2), EVENT_ARRIVAL_2);
-		destination = 3;
+		fprintf (outfile, "Ev arrival 2\n");
+    destination = 3;
 	}
 	else if (station == 3)
 	{
 		event_schedule(sim_time + expon (mean_interarrival[3], STREAM_INTERARRIVAL_3), EVENT_ARRIVAL_3);
-		destination = random_integer (prob_distrib_dest, STREAM_DESTINATION_ARV);
-	}
+    destination = random_integer (prob_distrib_dest, STREAM_DESTINATION_ARV);
+	  fprintf (outfile, "Ev arrival 3 %d\n", destination);
+  }
 
-	transfer[1] = sim_time;
-	transfer[2] = station;
-	transfer[3] = destination;
-	list_file(LAST, station);
+  transfer[1] = sim_time;
+  transfer[2] = station;
+  transfer[3] = destination;
+  list_file(LAST, station);
+  
+  if ((bus_position == station) && (bus_idle == 1))
+  {
+    load();
+  }
+    
 }
 
 void arrive_b(){
@@ -135,6 +156,7 @@ void arrive_b(){
   //sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
   
   arrive_time_b = sim_time;
+  fprintf (outfile, "Ev arrive bus%21d\n", bus_position);
   unload();
   load();
 }
@@ -175,6 +197,9 @@ main ()				/* Main function. */
   /* Initialize bus position. */
 
   bus_position = 3;
+  bus_idle = 1;
+  waiting_time = 2;
+  capacity = MAX_NUM_SEATS;
 
   /* Initialize simlib */
 
