@@ -53,12 +53,8 @@ void load() {
   if (list_size[terminal] > 0 && capacity > 0) {
     list_remove(FIRST, terminal);
     arrival_time = transfer[1];
-    origin = transfer[2];
     destination = transfer[3]; // destination yg ditentukan saat arrive
     
-    transfer[1] = sim_time;
-    transfer[2] = origin;
-    transfer[3] = destination;
     list_file(LAST, MAX_NUM_STATIONS + destination);
 
     --capacity;
@@ -99,7 +95,7 @@ void unload() {
     transfer[3] = origin;
     transfer[4] = destination;
     event_schedule(sim_time + uniform(16,24,STREAM_UNLOADING), EVENT_UNLOAD);
-    fprintf (outfile, "Ev unload%21d\n",capacity);
+    fprintf (outfile, "Ev unload%19d\n",capacity);
   }
   else {
     load();
@@ -162,7 +158,7 @@ void arrive_b(){
   //sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
   
   arrive_time_b = sim_time;
-  fprintf (outfile, "Ev arrive bus%21d\n", bus_position);
+  fprintf (outfile, "Ev arrive bus%19d\n", bus_position);
   unload();
   load();
 }
