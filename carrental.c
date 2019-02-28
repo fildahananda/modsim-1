@@ -23,8 +23,8 @@
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
 
-int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j;
-double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[MAX_NUM_STATIONS], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1];
+int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j, looping;
+double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[MAX_NUM_STATIONS], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final;
 FILE *infile, *outfile;
 
 void move_b(){
@@ -130,17 +130,23 @@ void arrive_b(){
   }
   else{
     bus_position = 1;
+    looping = 1;
+  }
+
+  if(bus_position == 1 && looping){
+    loop_final = sim_time - dist[init][bus_position];
+    sampst(loop_final - loop_ori, 10);
+    loop_ori = loop_final;
   }
 
   //sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
   
-  arrive_time_b = sim_time;
+  arrive_time_b = sim_time;)
   unload();
   load();
 }
 
-void report(){
-  // report
+void report(void){
 }
 
 int
