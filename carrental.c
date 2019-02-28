@@ -147,6 +147,46 @@ void arrive_b(){
 }
 
 void report(void){
+  fprintf (outfile, "a.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+		filest(i);
+		fprintf (outfile, "Average number in location %d queue: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum number in location %d queue: %0.3f\n", i, transfer[2]);
+	}
+	
+	fprintf (outfile, "\n\nb.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+		sampst(0.0, -i);
+		fprintf (outfile, "Average delay in location %d queue: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum delay in location %d queue: %0.3f\n", i, transfer[3]);
+	}
+	
+	fprintf (outfile, "\n\nc.\n");
+	timest(0.0, -1);
+	fprintf (outfile, "Average number on the bu: %0.3f\n", transfer[1]);
+	fprintf (outfile, "Maximum number on the bu: %0.3f\n", transfer[2]);
+	
+	fprintf (outfile, "\n\nd.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+
+		fprintf (outfile, "Average time stop in location %d: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum time stop in location %d: %0.3f\n", i, transfer[3]);
+		fprintf (outfile, "Minimum time stop in location %d: %0.3f\n", i, transfer[4]);
+	}
+	
+	fprintf (outfile, "\n\ne.\n");
+
+	fprintf (outfile, "Average time to make a loop:	%0.3f\n", transfer[1]);
+	fprintf (outfile, "Maximum time to make a loop:	%0.3f\n", transfer[3]);
+	fprintf (outfile, "Minimum time to make a loop:	%0.3f\n", transfer[4]);
+	
+	fprintf (outfile, "\n\nf.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+
+		fprintf (outfile, "Average time person in system from location %d: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum time person in system from location %d: %0.3f\n", i, transfer[3]);
+		fprintf (outfile, "Minimum time person in system from location %d: %0.3f\n", i, transfer[4]);
+	}
 }
 
 int
