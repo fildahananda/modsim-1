@@ -22,8 +22,8 @@
 #define VAR_PERSON_FROM_STATION 6  /* Zero index of statistic variable for person arrive at station 1/2/3 */
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
-int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j, bus_idle, looping;
-double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final;
+int bus_position, bus_moving, capacity, num_stations, num_seats, i, j, bus_idle, looping;
+double waiting_time, arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final;
 FILE *infile, *outfile;
 
 void move_b(){
@@ -39,17 +39,19 @@ void move_b(){
     dest = 3;
     // report time bus spent on loop here
   }
+  fprintf (outfile, "Bus moving after%0.3f\n", sim_time-arrive_time_b);  
 
   // report time bus spent on each station below 
-  event_schedule(sim_time+dist[init][dest], EVENT_ARRIVE_BUS);
+  event_schedule(sim_time + (dist[init][dest]/30), EVENT_ARRIVE_BUS);
   fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
 
 void load() {
   int arrival_time, origin, destination;
   int terminal = bus_position;
-  int time_at_position = sim_time - arrive_time_b;
-
+  double time_at_position = sim_time - arrive_time_b;
+  
+  fprintf (outfile, "time at position %0.3f\n",time_at_position);
   if (list_size[terminal] > 0 && capacity > 0) {
     list_remove(FIRST, terminal);
     arrival_time = transfer[1];
@@ -62,7 +64,7 @@ void load() {
 
     sampst(sim_time - arrival_time, VAR_QUEUE_STATION + terminal); // report delay time queue in this station
 
-    event_schedule(sim_time + uniform(15,25,STREAM_LOADING), EVENT_LOAD);
+    event_schedule(sim_time + uniform(0.0041667,0.0069444,STREAM_LOADING), EVENT_LOAD);
     fprintf (outfile, "Ev load%21d\n",capacity);
   }
   else {
@@ -72,9 +74,9 @@ void load() {
     else {
       event_schedule(sim_time + (waiting_time - time_at_position), EVENT_DEPARTURE_BUS);
 
-      // belum menangani kasus penumpang datang setelah loading selesai saat time_at_position < waiting_time
+      bus_idle = 1;
+      fprintf (outfile, "remaining time %0.8f\n",waiting_time - time_at_position);
     }
-    bus_idle = 1;
   }
 }
 
@@ -92,8 +94,14 @@ void unload() {
 
     sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
 
-    event_schedule(sim_time + uniform(16,24,STREAM_UNLOADING), EVENT_UNLOAD);
     fprintf (outfile, "Ev unload%19d\n",capacity);
+
+    if (list_size[MAX_NUM_STATIONS + destination] > 0) {
+      event_schedule(sim_time + uniform(0.00444,0.00667,STREAM_UNLOADING), EVENT_UNLOAD);
+    }
+    else {
+      event_schedule(sim_time + uniform(0.00444,0.00667,STREAM_UNLOADING), EVENT_LOAD);
+    }
   }
   else {
     load();
@@ -130,6 +138,7 @@ void arrive (int new_job, int station)
   
   if ((bus_position == station) && (bus_idle == 1))
   {
+    event_cancel(EVENT_DEPARTURE_BUS);
     load();
   }
     
@@ -158,7 +167,6 @@ void arrive_b(){
   arrive_time_b = sim_time;
   fprintf (outfile, "Ev arrive bus%19d\n", bus_position);
   unload();
-  load();
 }
 
 void report(void){
@@ -235,9 +243,9 @@ main ()				/* Main function. */
 
   /* Initialize bus position. */
 
-  bus_position = 3;
+  bus_position = 2;
   bus_idle = 1;
-  waiting_time = 2;
+  waiting_time = 0.25;
   capacity = MAX_NUM_SEATS;
 
   /* Initialize simlib */
@@ -249,6 +257,7 @@ main ()				/* Main function. */
   maxatr = 4;			/* NEVER SET maxatr TO BE SMALLER THAN 4. */
 
   /* Schedule the arrival of the first job. */
+  event_schedule (0.0, EVENT_ARRIVE_BUS);
 
   event_schedule (expon (mean_interarrival[1], STREAM_INTERARRIVAL_1), EVENT_ARRIVAL_1);
   event_schedule (expon (mean_interarrival[2], STREAM_INTERARRIVAL_2), EVENT_ARRIVAL_2);
@@ -270,7 +279,7 @@ main ()				/* Main function. */
       timing ();
 
       /* Invoke the appropriate event function. */
-
+      
       switch (next_event_type)
 	{
 	case EVENT_ARRIVAL_1:
