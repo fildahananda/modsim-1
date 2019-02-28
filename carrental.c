@@ -39,10 +39,11 @@ void move_b(){
     dest = 3;
     // report time bus spent on loop here
   }
-  fprintf (outfile, "Bus moving after%0.3f\n", sim_time-arrive_time_b);  
+  fprintf (outfile, "Bus moving after %0.3f\n", sim_time-arrive_time_b);  
 
-  // report time bus spent on each station below 
-  event_schedule(sim_time + (dist[init][dest]/30), EVENT_ARRIVE_BUS);
+  // report time bus spent on each station here 
+
+  event_schedule(sim_time + (dist[init][dest]/30.0f), EVENT_ARRIVE_BUS);
   fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
 
@@ -51,7 +52,8 @@ void load() {
   int terminal = bus_position;
   double time_at_position = sim_time - arrive_time_b;
   
-  fprintf (outfile, "time at position %0.3f\n",time_at_position);
+  bus_idle = 0;
+  // fprintf (outfile, "time at position %0.3f\n",time_at_position);
   if (list_size[terminal] > 0 && capacity > 0) {
     list_remove(FIRST, terminal);
     arrival_time = transfer[1];
@@ -166,6 +168,7 @@ void arrive_b(){
   
   arrive_time_b = sim_time;
   fprintf (outfile, "Ev arrive bus%19d\n", bus_position);
+  fprintf (outfile, "Number to unload%16d\n",list_size[MAX_NUM_STATIONS+bus_position]);
   unload();
 }
 
@@ -245,7 +248,7 @@ main ()				/* Main function. */
 
   bus_position = 2;
   bus_idle = 1;
-  waiting_time = 0.25;
+  waiting_time = 0.0710333;
   capacity = MAX_NUM_SEATS;
 
   /* Initialize simlib */
