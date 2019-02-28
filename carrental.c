@@ -22,9 +22,8 @@
 #define VAR_PERSON_FROM_STATION 6  /* Zero index of statistic variable for person arrive at station 1/2/3 */
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
-
-int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j, bus_idle;
-double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1];
+int bus_position, bus_moving, capacity, waiting_time, num_stations, num_seats, i, j, bus_idle, looping;
+double arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final;
 FILE *infile, *outfile;
 
 void move_b(){
@@ -151,6 +150,13 @@ void arrive_b(){
   }
   else{
     bus_position = 1;
+    looping = 1;
+  }
+
+  if(bus_position == 1 && looping){
+    loop_final = sim_time - dist[init][bus_position];
+    sampst(loop_final - loop_ori, 10);
+    loop_ori = loop_final;
   }
 
   //sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
@@ -161,8 +167,47 @@ void arrive_b(){
   load();
 }
 
-void report(){
-  // report
+void report(void){
+  fprintf (outfile, "a.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+		filest(i);
+		fprintf (outfile, "Average number in location %d queue: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum number in location %d queue: %0.3f\n", i, transfer[2]);
+	}
+	
+	fprintf (outfile, "\n\nb.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+		sampst(0.0, -i);
+		fprintf (outfile, "Average delay in location %d queue: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum delay in location %d queue: %0.3f\n", i, transfer[3]);
+	}
+	
+	fprintf (outfile, "\n\nc.\n");
+	timest(0.0, -1);
+	fprintf (outfile, "Average number on the bu: %0.3f\n", transfer[1]);
+	fprintf (outfile, "Maximum number on the bu: %0.3f\n", transfer[2]);
+	
+	fprintf (outfile, "\n\nd.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+
+		fprintf (outfile, "Average time stop in location %d: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum time stop in location %d: %0.3f\n", i, transfer[3]);
+		fprintf (outfile, "Minimum time stop in location %d: %0.3f\n", i, transfer[4]);
+	}
+	
+	fprintf (outfile, "\n\ne.\n");
+
+	fprintf (outfile, "Average time to make a loop:	%0.3f\n", transfer[1]);
+	fprintf (outfile, "Maximum time to make a loop:	%0.3f\n", transfer[3]);
+	fprintf (outfile, "Minimum time to make a loop:	%0.3f\n", transfer[4]);
+	
+	fprintf (outfile, "\n\nf.\n");
+	for (i = 1; i <= MAX_NUM_STATIONS; i++){
+
+		fprintf (outfile, "Average time person in system from location %d: %0.3f\n", i, transfer[1]);
+		fprintf (outfile, "Maximum time person in system from location %d: %0.3f\n", i, transfer[3]);
+		fprintf (outfile, "Minimum time person in system from location %d: %0.3f\n", i, transfer[4]);
+	}
 }
 
 int
