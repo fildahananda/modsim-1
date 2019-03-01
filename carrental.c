@@ -23,7 +23,7 @@
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
 int bus_position, bus_moving, capacity, num_stations, num_seats, i, j, bus_idle, looping;
-double waiting_time, arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final;
+double waiting_time, arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final, speed;
 FILE *infile, *outfile;
 
 void move_b(){
@@ -43,7 +43,7 @@ void move_b(){
 
   // report time bus spent on each station below
   sampst(sim_time - arrive_time_b, VAR_BUS_AT_STATION + bus_position); 
-  event_schedule(sim_time + (dist[init][dest]/30), EVENT_ARRIVE_BUS);
+  event_schedule(sim_time + (dist[init][dest]), EVENT_ARRIVE_BUS);
   fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
 
@@ -157,7 +157,7 @@ void arrive_b(){
     looping = 1;
   }
 
-  if(bus_position == 1 && looping){
+  if(bus_position == 3 && looping){
     loop_final = sim_time - dist[init][bus_position];
     sampst(loop_final - loop_ori, VAR_BUS);
     loop_ori = loop_final;
@@ -217,11 +217,18 @@ int
 main ()				/* Main function. */
 {
   /* Open input and output files. */
-
+  looping = 0;
   infile = fopen ("carrental.in", "r");
   outfile = fopen ("carrental.out", "w");
 
   /* Read input parameters. */
+  fscanf (infile, "%d %lg", &num_seats, &speed);
+  for (i = 1; i <= num_stations; ++i) {
+    for (j = 1; j <=num_stations; ++j) {
+        fscanf (infile, "%lg", &dist[i][j]);
+        dist[i][j] = dist[i][j]/speed; // replace jarak in miles menjadi waktu tempuh in seconds  
+      }
+  }
 
   fscanf (infile, "%d %lg", &num_stations, &length_simulation);
   for (j = 1; j <= num_stations; ++j)
