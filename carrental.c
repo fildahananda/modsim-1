@@ -225,7 +225,7 @@ main ()				/* Main function. */
 
   /* Read input parameters. */
   fscanf (infile, "%d %lg", &num_stations, &length_simulation);
-  fscanf (infile, "%lg", &speed);
+  fscanf (infile, "%lg %lg", &speed, &waiting_time);
   for (i = 1; i <= num_stations; ++i) {
     for (j = 1; j <=num_stations; ++j) {
         fscanf (infile, "%lg", &dist[i][j]);
@@ -250,13 +250,15 @@ main ()				/* Main function. */
   fprintf (outfile, "\n\nMean interarrival time of each stations ");
   for (i = 1; i <= num_stations; ++i)
     fprintf (outfile, "%8.3f", mean_interarrival[i]);
-  fprintf (outfile, "\n\nLength of the simulation%20.1f hours\n", length_simulation);
+  fprintf (outfile, "\n\nLength of the simulation%20.1f hours", length_simulation);
+  fprintf (outfile, "\n\nSpeed of bus%32.1f miles per hour", speed);
+  fprintf (outfile, "\n\nBus idle time in station%20.1f minutes\n\n", waiting_time);
 
   /* Initialize bus position. */
 
   bus_position = 2;
   bus_idle = 1;
-  waiting_time = 0.0710333;
+  waiting_time = waiting_time/60.0f;
   capacity = MAX_NUM_SEATS;
 
   /* Initialize simlib */
