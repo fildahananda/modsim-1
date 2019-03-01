@@ -83,7 +83,8 @@ void load() {
 
 void unload() {
   int destination = bus_position;
-  int origin, arrival_time;
+  int origin;
+  double arrival_time;
 
   if (list_size[MAX_NUM_STATIONS + destination] > 0) {
     list_remove(FIRST, MAX_NUM_STATIONS + destination);
