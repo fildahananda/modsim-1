@@ -23,7 +23,7 @@
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
 int bus_position, bus_moving, capacity, num_stations, num_seats, i, j, bus_idle, looping;
-double waiting_time, arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final;
+double waiting_time, arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final, speed;
 FILE *infile, *outfile;
 
 void move_b(){
@@ -39,11 +39,10 @@ void move_b(){
     dest = 3;
     // report time bus spent on loop here
   }
-  fprintf (outfile, "Bus moving after %0.3f\n", sim_time-arrive_time_b);  
+  fprintf (outfile, "Bus moving after%0.3f\n", sim_time - arrive_time_b);  
 
-  // report time bus spent on each station here 
-
-  event_schedule(sim_time + (dist[init][dest]/30.0f), EVENT_ARRIVE_BUS);
+  sampst(sim_time - arrive_time_b, VAR_BUS_AT_STATION + bus_position); 
+  event_schedule(sim_time + (dist[init][dest]), EVENT_ARRIVE_BUS);
   fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
 
@@ -62,7 +61,7 @@ void load() {
     list_file(LAST, MAX_NUM_STATIONS + destination);
 
     --capacity;
-    timest(capacity, VAR_BUS); // report changing number on the bus
+    timest(MAX_NUM_SEATS - capacity, VAR_BUS); // report changing number on the bus
 
     sampst(sim_time - arrival_time, VAR_QUEUE_STATION + terminal); // report delay time queue in this station
 
@@ -92,7 +91,7 @@ void unload() {
     origin = transfer[2];
 
     ++capacity;
-    timest(capacity, VAR_BUS); // report changing number on the bus
+    timest(MAX_NUM_SEATS - capacity, VAR_BUS); // report changing number on the bus
 
     sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
 
@@ -158,9 +157,9 @@ void arrive_b(){
     looping = 1;
   }
 
-  if(bus_position == 1 && looping){
+  if(bus_position == 3 && looping){
     loop_final = sim_time - dist[init][bus_position];
-    sampst(loop_final - loop_ori, 10);
+    sampst(loop_final - loop_ori, VAR_BUS);
     loop_ori = loop_final;
   }
 
@@ -188,27 +187,27 @@ void report(void){
 	}
 	
 	fprintf (outfile, "\n\nc.\n");
-	timest(0.0, -1);
-	fprintf (outfile, "Average number on the bu: %0.3f\n", transfer[1]);
-	fprintf (outfile, "Maximum number on the bu: %0.3f\n", transfer[2]);
+	timest(0.0, -VAR_BUS);
+	fprintf (outfile, "Average number on the bus: %0.3f\n", transfer[1]);
+	fprintf (outfile, "Maximum number on the bus: %0.3f\n", transfer[2]);
 	
 	fprintf (outfile, "\n\nd.\n");
 	for (i = 1; i <= MAX_NUM_STATIONS; i++){
-    sampst(0.0, -i + VAR_BUS_AT_STATION);
+    sampst(0.0, -i - VAR_BUS_AT_STATION);
 		fprintf (outfile, "Average time stop in location %d: %0.3f\n", i, transfer[1]);
 		fprintf (outfile, "Maximum time stop in location %d: %0.3f\n", i, transfer[3]);
 		fprintf (outfile, "Minimum time stop in location %d: %0.3f\n", i, transfer[4]);
 	}
 	
 	fprintf (outfile, "\n\ne.\n");
-  sampst(0.0, -10);
+  sampst(0.0, -VAR_BUS);
 	fprintf (outfile, "Average time to make a loop:	%0.3f\n", transfer[1]);
 	fprintf (outfile, "Maximum time to make a loop:	%0.3f\n", transfer[3]);
 	fprintf (outfile, "Minimum time to make a loop:	%0.3f\n", transfer[4]);
 	
 	fprintf (outfile, "\n\nf.\n");
 	for (i = 1; i <= MAX_NUM_STATIONS; i++){
-    sampst(0.0, -i + VAR_QUEUE_STATION);
+    sampst(0.0, -i - VAR_PERSON_FROM_STATION);
 		fprintf (outfile, "Average time person in system from location %d: %0.3f\n", i, transfer[1]);
 		fprintf (outfile, "Maximum time person in system from location %d: %0.3f\n", i, transfer[3]);
 		fprintf (outfile, "Minimum time person in system from location %d: %0.3f\n", i, transfer[4]);
@@ -219,11 +218,18 @@ int
 main ()				/* Main function. */
 {
   /* Open input and output files. */
-
+  looping = 0;
   infile = fopen ("carrental.in", "r");
   outfile = fopen ("carrental.out", "w");
 
   /* Read input parameters. */
+  fscanf (infile, "%d %lg", &num_seats, &speed);
+  for (i = 1; i <= num_stations; ++i) {
+    for (j = 1; j <=num_stations; ++j) {
+        fscanf (infile, "%lg", &dist[i][j]);
+        dist[i][j] = dist[i][j]/speed; // replace jarak in miles menjadi waktu tempuh in seconds  
+      }
+  }
 
   fscanf (infile, "%d %lg", &num_stations, &length_simulation);
   for (j = 1; j <= num_stations; ++j)
