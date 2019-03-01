@@ -222,15 +222,12 @@ main ()				/* Main function. */
   outfile = fopen ("carrental.out", "w");
 
   /* Read input parameters. */
-  fscanf (infile, "%d %lg", &num_seats, &speed);
+  fscanf (infile, "%d %lg", &num_stations, &length_simulation);
   for (i = 1; i <= num_stations; ++i) {
     for (j = 1; j <=num_stations; ++j) {
         fscanf (infile, "%lg", &dist[i][j]);
-        dist[i][j] = dist[i][j]/speed; // replace jarak in miles menjadi waktu tempuh in seconds  
       }
   }
-
-  fscanf (infile, "%d %lg", &num_stations, &length_simulation);
   for (j = 1; j <= num_stations; ++j)
     fscanf (infile, "%lg", &mean_interarrival[j]);
 
