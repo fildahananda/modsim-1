@@ -22,7 +22,7 @@
 #define VAR_PERSON_FROM_STATION 6  /* Zero index of statistic variable for person arrive at station 1/2/3 */
 #define VAR_BUS                 10 /* Statistic variable for bus */
 
-int bus_position, bus_moving, capacity, num_stations, num_seats, i, j, bus_idle, looping;
+int bus_position, bus_moving, capacity, num_stations, i, j, bus_idle, looping;
 double waiting_time, arrive_time_b, mean_interarrival[MAX_NUM_STATIONS + 1], length_simulation, prob_distrib_dest[3], dist[MAX_NUM_STATIONS+1][MAX_NUM_STATIONS+1], loop_ori, loop_final, speed;
 FILE *infile, *outfile;
 
@@ -39,17 +39,17 @@ void move_b(){
     dest = 3;
     // report time bus spent on loop here
   }
-  fprintf (outfile, "Bus moving after%0.3f\n", sim_time - arrive_time_b);  
+  //fprintf (outfile, "Bus moving after%0.3f\n", sim_time - arrive_time_b);  
 
   sampst(sim_time - arrive_time_b, VAR_BUS_AT_STATION + bus_position); 
   event_schedule(sim_time + (dist[init][dest]), EVENT_ARRIVE_BUS);
-  fprintf (outfile, "Ev move bus%21d\n", bus_position);
+  //fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
 
 void load() {
-  int arrival_time, origin, destination;
+  int origin, destination;
   int terminal = bus_position;
-  double time_at_position = sim_time - arrive_time_b;
+  double time_at_position = sim_time - arrive_time_b, arrival_time;
   
   bus_idle = 0;
   // fprintf (outfile, "time at position %0.3f\n",time_at_position);
@@ -66,7 +66,7 @@ void load() {
     sampst(sim_time - arrival_time, VAR_QUEUE_STATION + terminal); // report delay time queue in this station
 
     event_schedule(sim_time + uniform(0.0041667,0.0069444,STREAM_LOADING), EVENT_LOAD);
-    fprintf (outfile, "Ev load%21d\n",capacity);
+    //fprintf (outfile, "Ev load%21d\n",capacity);
   }
   else {
     if (time_at_position >= waiting_time) {
@@ -76,7 +76,7 @@ void load() {
       event_schedule(sim_time + (waiting_time - time_at_position), EVENT_DEPARTURE_BUS);
 
       bus_idle = 1;
-      fprintf (outfile, "remaining time %0.8f\n",waiting_time - time_at_position);
+      //fprintf (outfile, "remaining time %0.8f\n",waiting_time - time_at_position);
     }
   }
 }
@@ -96,7 +96,7 @@ void unload() {
 
     sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
 
-    fprintf (outfile, "Ev unload%19d\n",capacity);
+    //fprintf (outfile, "Ev unload%19d\n",capacity);
 
     if (list_size[MAX_NUM_STATIONS + destination] > 0) {
       event_schedule(sim_time + uniform(0.00444,0.00667,STREAM_UNLOADING), EVENT_UNLOAD);
@@ -117,20 +117,20 @@ void arrive (int new_job, int station)
 	if (station == 1)
 	{
 		event_schedule(sim_time + expon (mean_interarrival[1], STREAM_INTERARRIVAL_1), EVENT_ARRIVAL_1);
-		fprintf (outfile, "Ev arrival 1\n");
+		//fprintf (outfile, "Ev arrival 1\n");
     destination = 3;
 	}
 	else if (station == 2)
 	{
 		event_schedule(sim_time + expon (mean_interarrival[2], STREAM_INTERARRIVAL_2), EVENT_ARRIVAL_2);
-		fprintf (outfile, "Ev arrival 2\n");
+		//fprintf (outfile, "Ev arrival 2\n");
     destination = 3;
 	}
 	else if (station == 3)
 	{
 		event_schedule(sim_time + expon (mean_interarrival[3], STREAM_INTERARRIVAL_3), EVENT_ARRIVAL_3);
     destination = random_integer (prob_distrib_dest, STREAM_DESTINATION_ARV);
-	  fprintf (outfile, "Ev arrival 3 %d\n", destination);
+	  //fprintf (outfile, "Ev arrival 3 %d\n", destination);
   }
 
   transfer[1] = sim_time;
@@ -167,12 +167,14 @@ void arrive_b(){
   //sampst(sim_time - arrive_time_b - dist[init][bus_position], 1);
   
   arrive_time_b = sim_time;
-  fprintf (outfile, "Ev arrive bus%19d\n", bus_position);
-  fprintf (outfile, "Number to unload%16d\n",list_size[MAX_NUM_STATIONS+bus_position]);
+  //fprintf (outfile, "Ev arrive bus%19d\n", bus_position);
+  //fprintf (outfile, "Number to unload%16d\n",list_size[MAX_NUM_STATIONS+bus_position]);
   unload();
 }
 
 void report(void){
+  fprintf (outfile, "\n\nReport on Car Rental Model in hour(s)\n\n");
+
   fprintf (outfile, "a.\n");
 	for (i = 1; i <= MAX_NUM_STATIONS; i++){
 		filest(i);
@@ -226,6 +228,7 @@ main ()				/* Main function. */
   /* Read input parameters. */
   fscanf (infile, "%d %lg", &num_stations, &length_simulation);
   fscanf (infile, "%lg %lg", &speed, &waiting_time);
+
   for (i = 1; i <= num_stations; ++i) {
     for (j = 1; j <=num_stations; ++j) {
         fscanf (infile, "%lg", &dist[i][j]);
@@ -233,7 +236,6 @@ main ()				/* Main function. */
       }
   }
 
-  
   for (j = 1; j <= num_stations; ++j)
     fscanf (infile, "%lg", &mean_interarrival[j]);
 
