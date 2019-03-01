@@ -223,9 +223,11 @@ main ()				/* Main function. */
 
   /* Read input parameters. */
   fscanf (infile, "%d %lg", &num_stations, &length_simulation);
+  fscanf (infile, "%lg", &speed);
   for (i = 1; i <= num_stations; ++i) {
     for (j = 1; j <=num_stations; ++j) {
         fscanf (infile, "%lg", &dist[i][j]);
+        dist[i][j] = dist[i][j]/speed;
       }
   }
   for (j = 1; j <= num_stations; ++j)
