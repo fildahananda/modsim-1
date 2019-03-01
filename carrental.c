@@ -192,7 +192,7 @@ void report(void){
 	
 	fprintf (outfile, "\n\nd.\n");
 	for (i = 1; i <= MAX_NUM_STATIONS; i++){
-    sampst(0.0, -i + VAR_BUS_AT_STATION);
+    sampst(0.0, -i - VAR_BUS_AT_STATION);
 		fprintf (outfile, "Average time stop in location %d: %0.3f\n", i, transfer[1]);
 		fprintf (outfile, "Maximum time stop in location %d: %0.3f\n", i, transfer[3]);
 		fprintf (outfile, "Minimum time stop in location %d: %0.3f\n", i, transfer[4]);
