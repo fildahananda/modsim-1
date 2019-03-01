@@ -39,10 +39,10 @@ void move_b(){
     dest = 3;
     // report time bus spent on loop here
   }
-  fprintf (outfile, "Bus moving after%0.3f\n", sim_time-arrive_time_b);  
+  fprintf (outfile, "Bus moving after%0.3f\n", sim_time - arrive_time_b);  
 
   // report time bus spent on each station below
-  sampst(sim_time-arrive_time_b, VAR_BUS_AT_STATION + bus_position); 
+  sampst(sim_time - arrive_time_b, VAR_BUS_AT_STATION + bus_position); 
   event_schedule(sim_time + (dist[init][dest]/30), EVENT_ARRIVE_BUS);
   fprintf (outfile, "Ev move bus%21d\n", bus_position);
 }
@@ -61,7 +61,7 @@ void load() {
     list_file(LAST, MAX_NUM_STATIONS + destination);
 
     --capacity;
-    timest(capacity, VAR_BUS); // report changing number on the bus
+    timest(MAX_NUM_SEATS - capacity, VAR_BUS); // report changing number on the bus
 
     sampst(sim_time - arrival_time, VAR_QUEUE_STATION + terminal); // report delay time queue in this station
 
@@ -91,7 +91,7 @@ void unload() {
     origin = transfer[2];
 
     ++capacity;
-    timest(capacity, VAR_BUS); // report changing number on the bus
+    timest(MAX_NUM_SEATS - capacity, VAR_BUS); // report changing number on the bus
 
     sampst(sim_time - arrival_time, VAR_PERSON_FROM_STATION + origin); // report time spent per person for each origin station
 
